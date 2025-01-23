@@ -69,7 +69,7 @@ prompt=[
     the SQL command will be something like this SELECT COUNT(*) FROM employeeTable ;
     \nExample 2 - Tell me all the employees whose designation is Associate Engineer?, 
     the SQL command will be something like this SELECT * FROM employeeTable 
-    where designation="Data Science"; 
+    where designation="Associate Engineer"; 
     Also make use of aggregate functions used in MySql to improve efficiency,
     also the sql code should not have ``` in beginning or end and sql word in output
     
