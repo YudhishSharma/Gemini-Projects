@@ -9,29 +9,35 @@ load_dotenv()
 # Alias for mysql.connector.Error
 MySQLError = mysql.connector.Error
 
-# SQL queries required
+# SQL queries
 CREATE_TABLE = """
     create table if not exists employeeTable(
         employeeID int primary key,
         employeeName varchar(100) not null,
         designation varchar(50) not null,
-        salary decimal(10, 2) not null
+        salary float not null
     );
 """
 
 ADD_ENTRIES = """
     INSERT INTO employeeTable (employeeID, employeeName, designation, salary)
     VALUES 
-    (8150808, 'Yudhish Sharma', 'Associate Engineer', '123456'),
-    (8140440, 'Gavin Schindler', 'Engineer', '3454345'),
-    (8135249, 'Krishna Prasad Budamkayala', 'Senior Lead Software Engineer', '55654345'),
-    (8156295, 'Manikanta Venkata Sainath Gottipalli', 'Associate Architect', '76766755'),
-    (8166121, 'Rajeswari Anamalaboina', 'Senior Software Engineer', '6686433');
+    (101001, 'John Doe', 'Software Engineer', '75000'),
+    (101002, 'Jane Smith', 'Data Scientist', '85000'),
+    (101003, 'Michael Brown', 'Senior Developer', '95000'),
+    (101004, 'Emily Davis', 'Project Manager', '105000'),
+    (101005, 'William Wilson', 'System Architect', '115000'),
+    (101006, 'Olivia Moore', 'QA Tester', '55000'),
+    (101007, 'James Taylor', 'Business Analyst', '72000'),
+    (101008, 'Sophia White', 'DevOps Engineer', '80000'),
+    (101009, 'Benjamin Harris', 'Product Manager', '110000'),
+    (101010, 'Isabella Clark', 'UX Designer', '65000');
 """
 
 FETCH_DATA = """
     select * from employeeTable;
 """
+
 
 # Function to connect to the database
 def get_database_connection():
@@ -82,7 +88,7 @@ def add_entries_to_table(database_connection):
         
         # Commit the changes
         database_connection.commit()
-    except erMySQLError as errr:
+    except MySQLError as errr:
         print(f"\nError during adding entries: {err}")
     finally:
         cursor.close()
