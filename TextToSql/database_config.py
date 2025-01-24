@@ -11,31 +11,33 @@ MySQLError = mysql.connector.Error
 
 # SQL queries
 CREATE_TABLE = """
-    create table if not exists employeeTable(
-        employeeID int primary key,
-        employeeName varchar(100) not null,
-        designation varchar(50) not null,
-        salary float not null
+    create table if not exists banking(
+        id int primary key,
+        name varchar(100) not null,
+        date Date not null,
+        transaction_amount float not null,
+        type_of_transaction varchar(100) not null,
+        balance float not null
     );
 """
 
 ADD_ENTRIES = """
-    INSERT INTO employeeTable (employeeID, employeeName, designation, salary)
+    INSERT INTO banking (id, name, date, transaction_amount, type_of_transaction, balance)
     VALUES 
-    (101001, 'John Doe', 'Software Engineer', '75000'),
-    (101002, 'Jane Smith', 'Data Scientist', '85000'),
-    (101003, 'Michael Brown', 'Senior Developer', '95000'),
-    (101004, 'Emily Davis', 'Project Manager', '105000'),
-    (101005, 'William Wilson', 'System Architect', '115000'),
-    (101006, 'Olivia Moore', 'QA Tester', '55000'),
-    (101007, 'James Taylor', 'Business Analyst', '72000'),
-    (101008, 'Sophia White', 'DevOps Engineer', '80000'),
-    (101009, 'Benjamin Harris', 'Product Manager', '110000'),
-    (101010, 'Isabella Clark', 'UX Designer', '65000');
+    (1, 'John Doe', '2025-01-01', 500.0, 'Grocery', 1500.0),
+    (2, 'Jane Smith', '2025-01-02', 200.0, 'Food', 1300.0),
+    (3, 'Michael Johnson', '2025-01-03', 300.0, 'Travel', 1600.0),
+    (4, 'Emily Davis', '2025-01-04', 150.0, 'Beauty', 1450.0),
+    (5, 'Robert Brown', '2025-01-05', 700.0, 'Grocery', 2150.0),
+    (6, 'Olivia Wilson', '2025-01-06', 400.0, 'Food', 1750.0),
+    (7, 'William Garcia', '2025-01-07', 600.0, 'Travel', 2350.0),
+    (8, 'Sophia Martinez', '2025-01-08', 250.0, 'Beauty', 2100.0),
+    (9, 'James Anderson', '2025-01-09', 800.0, 'Grocery', 2900.0),
+    (10, 'Isabella Thomas', '2025-01-10', 100.0, 'Food', 2800.0);
 """
 
 FETCH_DATA = """
-    select * from employeeTable;
+    select * from banking;
 """
 
 
@@ -65,7 +67,7 @@ def create_table(database_connection):
         # Create an employee table
         cursor.execute(CREATE_TABLE)
         
-        print("\nTable 'employeeTable' created successfully !!")
+        # print("\nTable 'employeeTable' created successfully !!")
         
         # Commit the changes
         database_connection.commit()
@@ -84,7 +86,7 @@ def add_entries_to_table(database_connection):
         # Add entries to the table
         cursor.execute(ADD_ENTRIES)
         
-        print("\nEntries added successfully !!")
+        # print("\nEntries added successfully !!")
         
         # Commit the changes
         database_connection.commit()
@@ -107,7 +109,7 @@ def fetch_data(database_connection):
         results = cursor.fetchall()
         
         # Print the result
-        print("\nData in employeeTable:")
+        # print("\nData in employeeTable:")
         for rows in results:
             print(rows)
         

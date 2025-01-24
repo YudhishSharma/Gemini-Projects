@@ -1,4 +1,5 @@
-*venv/
-*.env
-.vscode/
-*overview.txt
+**venv/
+**.env
+**.vscode/
+**overview.txt
+**chat_history.json
