@@ -102,7 +102,7 @@ prompt = [
 
     Ensure that the generated SQL query is functional, efficient, and free from any SQL errors related to aggregation.
     Ensure you use the chat history and provide accurate sql query and only one query should be given, result should
-    contain  proper SQL syntax, it should not have any English  sentence and
+    contain  proper SQL syntax, it should not have any English  sentence and stick to the syntax
     also the sql code should not have ``` in beginning or end and sql word in output.
     """
 ]
