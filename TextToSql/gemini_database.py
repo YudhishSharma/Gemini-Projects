@@ -1,8 +1,10 @@
+import time
 from dotenv import load_dotenv
 
 import mysql.connector
 import google.generativeai as genai
 import streamlit as st
+import speech_recognition as sr
 import os
 import json
 
@@ -14,6 +16,9 @@ genai.configure(api_key = os.getenv("GEMINI_API_KEY"))
 
 # Alias for mysql.connector.Error
 MySQLError = mysql.connector.Error
+
+# Default Message
+DEFAULT_ASSISTANT_MESSAGE = "Hi buddy!! 😊 How can I help you with your account?"
 
 # Function to connect to the database
 def get_databaase_connection():
@@ -78,6 +83,19 @@ def load_chat_history_from_file():
 def save_chat_history_to_file(messages):
     with open("chat_history.json", "w") as file:
         json.dump(messages, file)
+        
+def get_speech_input():
+    recognizer = sr.Recognizer()
+    with sr.Microphone() as source:
+        st.info("Listening... Speak Now !!")
+        try:
+            audio = recognizer.listen(source, timeout = 7, phrase_time_limit = 10)
+            text = recognizer.recognize_google(audio)
+            return text
+        except sr.UnknownValueError:
+            st.warning("Sorry, I could not understand what you said!")
+        except sr.RequestError as e:
+            st.error(f"Sorry, an error occurred while processing your request!:  {e}")
 
 
 #  Define your prompt
@@ -101,9 +119,9 @@ prompt = [
     GROUP BY type_of_transaction;
 
     Ensure that the generated SQL query is functional, efficient, and free from any SQL errors related to aggregation.
-    Ensure you use the chat history and provide accurate sql query and only one query should be given, result should
-    contain  proper SQL syntax, it should not have any English  sentence and stick to the syntax
-    also the sql code should not have ``` in beginning or end and sql word in output.
+    Ensure you use the chat history and provide accurate sql query and only one query should be given and very important point to note
+    the result should contain  proper SQL syntax with no comments or any English sentence added to it and the last output sql code should not have 
+    ``` in beginning or end and should not have sql word in output. To be more specific the output should be only SQL code without sql word in it.
     """
 ]
 
@@ -111,9 +129,6 @@ prompt = [
 # Streamlit part
 st.set_page_config(page_title = "Text To SQL")
 st.header("Gemini Query Retreiver")
-
-# Default Message
-DEFAULT_ASSISTANT_MESSAGE = "Hi buddy!! 😊 How can I help you with your account?"
 
 # Store conversation history
 if "messages" not in st.session_state:
@@ -130,17 +145,9 @@ for messagge in st.session_state["messages"]:
     with st.chat_message(messagge["role"]):
         st.write(messagge["content"])
         
-# Get user input
-if user_input := st.chat_input("Enter you query"):
-    # Add user message to chat history
-    st.session_state["messages"].append({"role": "user", "content": user_input})
-    
-    # Display user message
-    with st.chat_message("user"):
-        st.write(user_input)
-        
+def text_to_sql_using_gemini(query, prompt):
     # Get the SQL query from gemini
-    response_from_gemini = convert_sentence_to_query_using_gemini(user_input, prompt)
+    response_from_gemini = convert_sentence_to_query_using_gemini(query, prompt)
     print(response_from_gemini)
     # Pass that qquery to the database
     response_from_database = read_sql_query(response_from_gemini)
@@ -158,4 +165,25 @@ if user_input := st.chat_input("Enter you query"):
         st.write(response_content) 
     
     save_chat_history_to_file(st.session_state["messages"])
+        
+
+# Get user input
+if user_input := st.chat_input("Enter you query"):
+    # Add user message to chat history
+    st.session_state["messages"].append({"role": "user", "content": user_input})
+    
+    # Display user message
+    with st.chat_message("user"):
+        st.write(user_input)
+        
+    # Get response from Gemini
+    text_to_sql_using_gemini(user_input, prompt)
+    
+if st.button("🎙 Speak"):
+    speech_input = get_speech_input()
+    if(speech_input):
+        st.session_state["messages"].append({"role": "user", "content": speech_input})
+        with st.chat_message("user"):
+            st.write(speech_input)
+        text_to_sql_using_gemini(speech_input, prompt)   
     
