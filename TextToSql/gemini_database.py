@@ -182,3 +182,11 @@ if user_input := st.chat_input("Enter your query"):
     with st.chat_message("user"):
         st.write(user_input)
     text_to_sql_using_gemini(user_input, prompt)
+
+if st.button("🎙 Speak"):
+    speech_input = get_speech_input()
+    if(speech_input):
+        st.session_state["messages"].append({"role": "user", "content": speech_input})
+        with st.chat_message("user"):
+            st.write(speech_input)
+        text_to_sql_using_gemini(speech_input, prompt)   
