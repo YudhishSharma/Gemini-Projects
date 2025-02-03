@@ -1,4 +1,6 @@
+from pyexpat import model
 import time
+from urllib import response
 from dotenv import load_dotenv
 
 import mysql.connector
@@ -21,7 +23,7 @@ MySQLError = mysql.connector.Error
 DEFAULT_ASSISTANT_MESSAGE = "Hi buddy!! 😊 How can I help you with your account?"
 
 # Function to connect to the database
-def get_databaase_connection():
+def get_database_connection():
     try:
         database_connection = mysql.connector.connect(
             host = os.getenv("DB_HOST"),
@@ -41,9 +43,9 @@ def convert_sentence_to_query_using_gemini(sentence, prompt):
     response = model.generate_content([prompt[0], sentence])
     return response.text
 
-# Funtion to retrieve query from the database
+# Function to retrieve query from the database
 def read_sql_query(query):
-    database_connection = get_databaase_connection()
+    database_connection = get_database_connection()
     
     # Cursor to perform actions in the database
     cursor = database_connection.cursor()
@@ -57,12 +59,7 @@ def read_sql_query(query):
     database_connection.close()
     print("Connection to the MySQL server closed")
     
-    # Verify the data by iterating over the rows affected
-    for row in rows:
-        print(row)
-    
     return rows
-
 
 # Function to load chat history from file
 def load_chat_history_from_file():
@@ -71,15 +68,12 @@ def load_chat_history_from_file():
             with open("chat_history.json", "r") as file:
                 return json.load(file)
         except json.JSONDecodeError:
-            # If the file is empty or corrupt, start with an empty history
             print("Error: The chat history file is empty or corrupt. Starting with an empty history.")
             return []
     else:
-        # If the file doesn't exist, start with an empty history
         return []
 
-
-# Funtion to save history to file
+# Function to save history to file
 def save_chat_history_to_file(messages):
     with open("chat_history.json", "w") as file:
         json.dump(messages, file)
@@ -96,7 +90,6 @@ def get_speech_input():
             st.warning("Sorry, I could not understand what you said!")
         except sr.RequestError as e:
             st.error(f"Sorry, an error occurred while processing your request!:  {e}")
-
 
 #  Define your prompt
 prompt = [
@@ -125,10 +118,9 @@ prompt = [
     """
 ]
 
-
 # Streamlit part
 st.set_page_config(page_title = "Text To SQL")
-st.header("Gemini Query Retreiver")
+st.header("Gemini Query Retriever")
 
 # Store conversation history
 if "messages" not in st.session_state:
@@ -141,49 +133,52 @@ if st.button("New Chat"):
     st.success("Chat reset successfully. Start a new conversation.")
     
 # Display previous chat messages
-for messagge in st.session_state["messages"]:
-    with st.chat_message(messagge["role"]):
-        st.write(messagge["content"])
+for message in st.session_state["messages"]:
+    with st.chat_message(message["role"]):
+        st.write(message["content"])
         
+def classify_user_intent(query):
+    """Determine if the user wants a SQL query, explanation, or general conversation."""
+    model = genai.GenerativeModel('gemini-pro')
+    classification_prompt = """
+    Classify the following user input into one of three categories:
+    1. 'sql' if the user wants database information (e.g., retrieving transactions, balance, banking details).
+    2. 'explanation' if the user is asking what the retrieved data means.
+    3. 'conversation' if the user is engaging in a general discussion.
+    Respond with only one word: 'sql', 'explanation', or 'conversation'.
+    """
+    response = model.generate_content([classification_prompt, query])
+    return response.text.strip().lower()
+
 def text_to_sql_using_gemini(query, prompt):
-    # Get the SQL query from gemini
-    response_from_gemini = convert_sentence_to_query_using_gemini(query, prompt)
-    print(response_from_gemini)
-    # Pass that qquery to the database
-    response_from_database = read_sql_query(response_from_gemini)
-    # If we get a response then displaay
-    if response_from_database:
-        response_content = f"Here are the  results: \n{response_from_database}"
+    
+    user_intent = classify_user_intent(query)
+    print(user_input)
+    if user_intent == "sql":
+        response_from_gemini = convert_sentence_to_query_using_gemini(query, prompt)
+        response_from_database = read_sql_query(response_from_gemini)
+        st.session_state["last_result"] = response_from_database  # Store the last database result
+        response_content = f"Here are the results: \n{response_from_database}" if response_from_database else "No data found or an error occurred."
+    elif user_intent == "explanation":
+        last_result = st.session_state.get("last_result", "No previous data available.")
+        model = genai.GenerativeModel('gemini-pro')
+        explanation_prompt = f"Explain the following database result based on the user's input: {last_result}. User query: {query}"
+        response = model.generate_content(explanation_prompt)
+        response_content = response.text
     else:
-        response_content = "No data found or an error occured"
+        model = genai.GenerativeModel('gemini-pro')
+        response = model.generate_content(query)
+        response_content = response.text
     
-    # Add gemini message to chat history
-    st.session_state["messages"].append({"role": "assistant", "content":response_content})
+    st.session_state["messages"].append({"role": "assistant", "content": response_content})
     
-    # Display gemini response
     with st.chat_message("assistant"):
         st.write(response_content) 
     
     save_chat_history_to_file(st.session_state["messages"])
         
-
-# Get user input
-if user_input := st.chat_input("Enter you query"):
-    # Add user message to chat history
+if user_input := st.chat_input("Enter your query"):
     st.session_state["messages"].append({"role": "user", "content": user_input})
-    
-    # Display user message
     with st.chat_message("user"):
         st.write(user_input)
-        
-    # Get response from Gemini
     text_to_sql_using_gemini(user_input, prompt)
-    
-if st.button("🎙 Speak"):
-    speech_input = get_speech_input()
-    if(speech_input):
-        st.session_state["messages"].append({"role": "user", "content": speech_input})
-        with st.chat_message("user"):
-            st.write(speech_input)
-        text_to_sql_using_gemini(speech_input, prompt)   
-    
