@@ -1,5 +1,6 @@
 from pyexpat import model
 import time
+from turtle import mode
 from urllib import response
 from dotenv import load_dotenv
 
@@ -145,6 +146,7 @@ def classify_user_intent(query):
     1. 'sql' if the user wants database information (e.g., retrieving transactions, balance, banking details).
     2. 'explanation' if the user is asking what the retrieved data means.
     3. 'conversation' if the user is engaging in a general discussion.
+    4. 'send_money' if the user wants to send money to another user.
     Respond with only one word: 'sql', 'explanation', or 'conversation'.
     """
     response = model.generate_content([classification_prompt, query])
@@ -156,6 +158,7 @@ def text_to_sql_using_gemini(query, prompt):
     print(user_input)
     if user_intent == "sql":
         response_from_gemini = convert_sentence_to_query_using_gemini(query, prompt)
+        response_from_gemini = response_from_gemini.replace("```", "").strip()
         response_from_database = read_sql_query(response_from_gemini)
         st.session_state["last_result"] = response_from_database  # Store the last database result
         response_content = f"Here are the results: \n{response_from_database}" if response_from_database else "No data found or an error occurred."
@@ -165,6 +168,80 @@ def text_to_sql_using_gemini(query, prompt):
         explanation_prompt = f"Explain the following database result based on the user's input: {last_result}. User query: {query}"
         response = model.generate_content(explanation_prompt)
         response_content = response.text
+    elif user_intent == "send_money":
+        # Pass the query to model to extract sender, receiver, and amount
+        model = genai.GenerativeModel('gemini-pro')
+        extraction_prompt = f"""
+        Extract the receiver and amount from the following query: {query}
+
+        Respond with a JSON object in the following format:
+
+        {{
+          "receiver": "the receiver's name or ID",
+          "amount": "the amount to send (as a number, without currency symbols or commas)",
+          "error": "a string describing any errors encountered, or null if no errors"
+        }}
+
+        Examples:
+
+        Input: "Send $100 to John Smith"
+        Output:
+        {{
+          "receiver": "John Smith",
+          "amount": 100,
+          "error": null
+        }}
+
+        Input: "Transfer one hundred dollars to john.davis"
+        Output:
+        {{
+          "receiver": "john.davis",
+          "amount": 100,
+          "error": null
+        }}
+
+        Input: "Send money to John"  (Amount missing)
+        Output:
+        {{
+          "receiver": null,
+          "amount": null,
+          "error": "Amount not specified"
+        }}
+
+        Input: "Send 100 to John, please."
+        Output:
+        {{
+          "receiver": "John",
+          "amount": 100,
+          "error": null
+        }}
+        ```
+        NOTE - The response should be a JSON object with the receiver's name or ID, the amount to send, and an error message if applicable, it
+        should not contain any comments or additional text, should not contain the word 'JSON', and should not be enclosed in triple backticks i.e it 
+        should not start and end with ```.
+        """
+        extraction_response = model.generate_content(extraction_prompt)
+        extraction_response_text = extraction_response.text.replace("```", "").strip()
+        print(extraction_response_text)
+        try:
+            extraction_response_json = json.loads(extraction_response_text)
+            receiver = extraction_response_json.get("receiver")
+            amount = extraction_response_json.get("amount")
+            error = extraction_response_json.get("error")
+            
+            print(receiver, amount, error)
+            
+            if error:
+                response_content = f"Transaction failed! {error}"
+            elif receiver or amount is not None:
+                response_content = send_money("Yudhish", receiver, amount)
+            else:
+                response_content = "Transaction failed! An error occurred while sending money."
+        except json.JSONDecodeError:
+            response_content = "Transaction failed! An error occurred while sending money."
+        except ValueError:
+            response_content = "Invalid Amount. Amount should be a number."
+            
     else:
         model = genai.GenerativeModel('gemini-pro')
         response = model.generate_content(query)
@@ -176,6 +253,49 @@ def text_to_sql_using_gemini(query, prompt):
         st.write(response_content) 
     
     save_chat_history_to_file(st.session_state["messages"])
+    
+    
+# Function to send money
+def send_money(sender, receiver, amount):
+    database_connection = get_database_connection()
+    cursor = database_connection.cursor(buffered = True)
+
+    try:
+        # Check if the sender has enough balance
+        cursor.execute(f"SELECT balance FROM banking") 
+        sender_balance_result = cursor.fetchone()
+        if sender_balance_result is None:
+            return f"Transaction failed! Sender '{sender}' not found." 
+        sender_balance = sender_balance_result[-1]
+        print(sender_balance)
+        if sender_balance < amount:
+            return f"Transaction failed! {sender} does not have enough balance to send {amount}."
+
+
+        # Update the balance of the sender
+        cursor = database_connection.cursor() 
+        cursor.execute(f"UPDATE banking SET balance = balance - {amount}") 
+        database_connection.commit() 
+
+        # Insert the record of the transaction
+        cursor = database_connection.cursor() 
+        cursor.execute(f"INSERT INTO banking (name, date, transaction_amount, type_of_transaction, credit_or_debit, balance) VALUES ('{receiver}', CURDATE(), {amount}, 'Personal', 'debit', {sender_balance - amount})")
+        database_connection.commit() 
+        cursor.close()
+
+        database_connection.close() 
+        print("Connection to the MySQL server closed")
+
+    except MySQLError as err:
+        print(f"Error during sending money: {err}")
+        database_connection.rollback()
+        return f"Transaction failed! An error occurred while sending money: {err}"  
+    except Exception as e: 
+        print(f"A general error occurred: {e}")
+        database_connection.rollback()
+        return f"Transaction failed! An error occurred: {e}"
+
+    return f"Transaction successful! {amount} has been sent from {sender} to {receiver}."
         
 if user_input := st.chat_input("Enter your query"):
     st.session_state["messages"].append({"role": "user", "content": user_input})
