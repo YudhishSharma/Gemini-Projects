@@ -41,6 +41,32 @@ FETCH_DATA = """
     select * from banking;
 """
 
+CREATE_BILL_TABLE = """
+    CREATE TABLE IF NOT EXISTS bills (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        type VARCHAR(50),
+        amount DECIMAL(10,2),
+        due_date DATE,
+        payment_date DATE,
+        status ENUM('unpaid', 'paid')
+    );
+"""
+
+ADD_ENTRIES_TO_BILLS = """
+    INSERT INTO bills (type, amount, due_date, payment_date, status) 
+    VALUES
+    ('electricity', 1200.50, '2025-02-10', '2025-02-12', 'paid'),
+    ('internet', 999.99, '2025-02-15', NULL, 'unpaid'),
+    ('water', 500.00, '2025-02-05', '2025-02-06', 'paid'),
+    ('phone', 650.75, '2025-02-20', NULL, 'unpaid'),
+    ('gas', 850.25, '2025-02-18', NULL, 'unpaid'),
+    ('credit_card', 5000.00, '2025-02-25', '2025-02-26', 'paid'),
+    ('insurance', 2000.00, '2025-03-01', NULL, 'unpaid'),
+    ('rent', 15000.00, '2025-02-28', NULL, 'unpaid'),
+    ('subscription', 399.99, '2025-02-14', '2025-02-14', 'paid'),
+    ('education_loan', 7500.00, '2025-03-05', NULL, 'unpaid');
+
+"""
 
 # Function to connect to the database
 def get_database_connection():
@@ -58,6 +84,29 @@ def get_database_connection():
         
     return database_connection
 
+
+
+def create_bill_table(database_connection):
+    try:
+        cursor = database_connection.cursor()
+        cursor.execute(CREATE_BILL_TABLE)
+        database_connection.commit()
+    except MySQLError as err:
+        print(f"\nError during creating table: {err}")
+    finally:
+        cursor.close()
+
+def add_entries_to_bills(database_connection):
+    try:
+        cursor = database_connection.cursor()
+        cursor.execute(ADD_ENTRIES_TO_BILLS)
+        database_connection.commit()
+    except MySQLError as err:
+        print(f"Error while adding entries to bills table: {err}")
+    finally:
+        cursor.close()
+        
+    
 # Funtion to create table 
 def create_table(database_connection):
     # Try and except to ensure smooth functioning and hadle any exception if occured
@@ -125,9 +174,11 @@ def fetch_data(database_connection):
 if __name__ == "__main__":
     database_connection = get_database_connection()
     if database_connection:
-        create_table(database_connection)
-        add_entries_to_table(database_connection)
-        fetch_data(database_connection)
+        # create_table(database_connection)
+        # add_entries_to_table(database_connection)
+        # fetch_data(database_connection)
+        create_bill_table(database_connection)
+        add_entries_to_bills(database_connection)
         
         # Close the connection
         database_connection.close()
