@@ -14,26 +14,27 @@ CREATE_TABLE = """
         id INT AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(100) NOT NULL,
         date DATE NOT NULL,
-        transaction_amount FLOAT NOT NULL,
+        transaction_amount DECIMAL(10,2) NOT NULL,
         type_of_transaction VARCHAR(100) NOT NULL,
         credit_or_debit VARCHAR(10) CHECK (credit_or_debit IN ('Credit', 'Debit')) NOT NULL,
-        balance FLOAT NOT NULL
+        balance DECIMAL(10,2) NOT NULL
     );
 """
 
 ADD_ENTRIES = """
     INSERT INTO banking (name, date, transaction_amount, type_of_transaction, credit_or_debit, balance)
     VALUES 
-    ('John Doe', '2025-01-01', 500.0, 'Grocery', 'Debit', 1500.0),
-    ('Jane Smith', '2025-01-02', 200.0, 'Food', 'Debit', 1300.0),
-    ('Michael Johnson', '2025-01-03', 300.0, 'Travel', 'Debit', 1600.0),
-    ('Emily Davis', '2025-01-04', 150.0, 'Beauty', 'Debit', 1450.0),
-    ('Robert Brown', '2025-01-05', 700.0, 'Grocery', 'Debit', 2150.0),
-    ('Olivia Wilson', '2025-01-06', 400.0, 'Food', 'Debit', 1750.0),
-    ('William Garcia', '2025-01-07', 600.0, 'Travel', 'Debit', 2350.0),
-    ('Sophia Martinez', '2025-01-08', 250.0, 'Beauty', 'Debit', 2100.0),
-    ('James Anderson', '2025-01-09', 800.0, 'Grocery', 'Debit', 2900.0),
-    ('Isabella Thomas', '2025-01-10', 100.0, 'Food', 'Debit', 2800.0);
+    ('John Doe', '2025-02-01', 50000.0, 'Initial Deposit', 'Credit', 50000.0),
+    ('Jane Smith', '2025-02-02', 10000.0, 'Salary', 'Credit', 60000.0),
+    ('Michael Johnson', '2025-02-03', 1500.0, 'Grocery', 'Debit', 58500.0),
+    ('Emily Davis', '2025-02-04', 5000.0, 'Freelance Income', 'Credit', 63500.0),
+    ('Robert Brown', '2025-02-05', 800.0, 'Food', 'Debit', 62700.0),
+    ('Olivia Wilson', '2025-02-06', 70000.0, 'Business Profit', 'Credit', 132700.0),
+    ('William Garcia', '2025-02-07', 1200.0, 'Shopping', 'Debit', 131500.0),
+    ('Sophia Martinez', '2025-02-08', 50000.0, 'Stock Market Profit', 'Credit', 181500.0),
+    ('James Anderson', '2025-02-09', 2000.0, 'Travel', 'Debit', 179500.0),
+    ('Isabella Thomas', '2025-02-10', 75000.0, 'Real Estate Sale', 'Credit', 254500.0);
+
 """
 
 
@@ -174,9 +175,9 @@ def fetch_data(database_connection):
 if __name__ == "__main__":
     database_connection = get_database_connection()
     if database_connection:
-        # create_table(database_connection)
-        # add_entries_to_table(database_connection)
-        # fetch_data(database_connection)
+        create_table(database_connection)
+        add_entries_to_table(database_connection)
+        fetch_data(database_connection)
         create_bill_table(database_connection)
         add_entries_to_bills(database_connection)
         

@@ -3,3 +3,4 @@
 **.vscode/
 **overview.txt
 **chat_history.json
+**__pycache__/
