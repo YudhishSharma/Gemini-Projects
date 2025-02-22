@@ -6,6 +6,7 @@ from database_connection import get_database_connection
 from chat_history import save_chat_history_to_file
 from bill_operations import extract_bill_details, pay_bills
 from transactions import extract_transaction_details, send_money
+from table_formatter import format_using_llm
 import prompts
 
 # Function to get gemini response (English Sentence -> SQL query)
@@ -25,12 +26,14 @@ def read_sql_query(query):
     # Rows affected by cursor
     rows = cursor.fetchall()
     
+    column_names = [desc[0] for desc in cursor.description]
+    
     # Commit to save the changes and then close the connection
     database_connection.commit()
     database_connection.close()
     print("Connection to the MySQL server closed")
     
-    return rows
+    return rows, column_names
 
 def text_to_sql_using_gemini(query, prompt):
     
@@ -47,6 +50,18 @@ def text_to_sql_using_gemini(query, prompt):
             response_content = f"Could not process bill payment: {error}"
         else:
             response_content = pay_bills(bill_type)
+    
+    elif user_intent == "table_format":
+        
+        last_result = st.session_state.get("last_result", "No previous data available.")
+        print("last result is -------------------> ",last_result)
+        last_columns = st.session_state.get("last_columns", "No previous columns available.")
+        
+        if last_result and last_columns:
+            formatted_table = format_using_llm(last_result, last_columns)
+            response_content = formatted_table
+        else:
+            response_content = "No previous data available to format."
             
             
     elif user_intent == "sql":
@@ -55,8 +70,11 @@ def text_to_sql_using_gemini(query, prompt):
         
         print("Response from gemini for the sql query:", response_from_gemini)
         
-        response_from_database = read_sql_query(response_from_gemini)
-        st.session_state["last_result"] = response_from_database  # Store the last database result
+        response_from_database, column_names = read_sql_query(response_from_gemini)
+        
+        if response_from_database:
+            st.session_state["last_columns"] = column_names
+            st.session_state["last_result"] = response_from_database  # Store the last database result
         
         response_content = f"Here are the results: \n{response_from_database}" if response_from_database else "No data found or an error occurred."
         

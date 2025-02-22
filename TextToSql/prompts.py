@@ -67,14 +67,15 @@ sql_prompt = [
 ]
 
 classification_prompt = """
-    Classify the following user input into one of five categories:
+    Classify the following user input into one of six categories:
     1. 'sql' if the user wants database information (e.g., retrieving transactions, balance, banking details, bills).
     2. 'explanation' if the user is asking what the retrieved data means.
     3. 'conversation' if the user is engaging in a general discussion.
     4. 'send_money' if the user wants to send money to another user.
     5. 'pay_bills' if the user wants to pay bills.
+    6. 'table_format' if the user wants the result in a structured table format (e.g., "Show the result in table format", "Prettify the result").
 
-    Respond with only one word: 'sql', 'explanation', 'conversation', 'send_money' or 'pay_bills'.
+    Respond with only one word: 'sql', 'explanation', 'conversation', 'send_money', 'pay_bills', or 'table_format'.
 
     Examples:
 
@@ -88,7 +89,6 @@ classification_prompt = """
     - "Send $100 to John" → send_money
     - "Transfer 500 to Alice" → send_money
     - "Hi" → conversation
+    - "Show the above result in a table format" → table_format
+    - "Prettify the result" → table_format
     """
-
-
-    
