@@ -53,9 +53,9 @@ def text_to_sql_using_gemini(query, prompt):
     
     elif user_intent == "table_format":
         
-        last_result = st.session_state.get("last_result", "No previous data available.")
+        last_result = st.session_state.get("last_result", None)
         print("last result is -------------------> ",last_result)
-        last_columns = st.session_state.get("last_columns", "No previous columns available.")
+        last_columns = st.session_state.get("last_columns", None)
         
         if last_result and last_columns:
             formatted_table = format_using_llm(last_result, last_columns)
@@ -85,6 +85,22 @@ def text_to_sql_using_gemini(query, prompt):
         response = model.generate_content(explanation_prompt)
         response_content = response.text
         
+    elif user_intent == "sql_and_format":
+        response_from_gemini = convert_sentence_to_query_using_gemini(query, prompt)
+        response_from_gemini = response_from_gemini.replace("```", "").strip()
+        
+        print("Response from gemini for the sql query:", response_from_gemini)
+        
+        response_from_database, column_names = read_sql_query(response_from_gemini)
+        
+        if response_from_database:
+            st.session_state["last_columns"] = column_names
+            st.session_state["last_result"] = response_from_database
+            
+            formatted_table = format_using_llm(response_from_database, column_names)
+            response_content = formatted_table
+        else:
+            response_content = "No data found or an error occurred."
         
     elif user_intent == "send_money":
         # Pass the query to model to extract sender, receiver, and amount

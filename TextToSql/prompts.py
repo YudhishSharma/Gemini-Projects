@@ -74,8 +74,10 @@ classification_prompt = """
     4. 'send_money' if the user wants to send money to another user.
     5. 'pay_bills' if the user wants to pay bills.
     6. 'table_format' if the user wants the result in a structured table format (e.g., "Show the result in table format", "Prettify the result").
+    7. 'sql_and_format' if the user is both **requesting database information AND wants the result in a structured table format** 
+       (e.g., "Show my transactions in a table", "Retrieve all bills and format them nicely").
 
-    Respond with only one word: 'sql', 'explanation', 'conversation', 'send_money', 'pay_bills', or 'table_format'.
+    Respond with only one word: 'sql', 'explanation', 'conversation', 'send_money', 'pay_bills', 'table_format' or 'sql_and_format'.
 
     Examples:
 
@@ -91,4 +93,6 @@ classification_prompt = """
     - "Hi" → conversation
     - "Show the above result in a table format" → table_format
     - "Prettify the result" → table_format
+    - "Show all transactions in a table format" → sql_table
+    - "Retrieve all bills and format them nicely" → sql_table
     """

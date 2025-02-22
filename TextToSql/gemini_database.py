@@ -37,6 +37,7 @@ if "messages" not in st.session_state:
 
 # New Chat button to start new conversation
 if st.button("New Chat"):
+    st.session_state.clear()
     st.session_state["messages"] = [{"role": "assistant", "content": DEFAULT_ASSISTANT_MESSAGE}]
     save_chat_history_to_file([])
     st.success("Chat reset successfully. Start a new conversation.")
