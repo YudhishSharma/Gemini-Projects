@@ -6,6 +6,7 @@ import mysql.connector
 MySQLError = mysql.connector.Error
 
 def get_database_connection():
+    database_connection = None
     try:
         database_connection = mysql.connector.connect(
             host = os.getenv("DB_HOST"),
@@ -16,5 +17,7 @@ def get_database_connection():
         print("Connected to the MySQL server successfully");
     except MySQLError as err:
         print(f"Error during connecting to server: {err}")
+    if database_connection is None:
+        raise ValueError("Database connection failed. Please check your credentials.")
         
     return database_connection
