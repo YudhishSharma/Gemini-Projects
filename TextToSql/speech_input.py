@@ -32,8 +32,8 @@ def get_speech_input():
 
         # Use SpeechRecognition to process the temporary WAV file
         with sr.AudioFile(temp_audio_path) as source:
-            audio = recognizer.record(source)  # Load the audio file
-            text = recognizer.recognize_google(audio)  # Convert speech to text
+            audio = recognizer.record(source)  
+            text = recognizer.recognize_google(audio) 
             return text
 
     except sr.UnknownValueError:
