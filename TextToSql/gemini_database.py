@@ -53,6 +53,7 @@ if user_input := st.chat_input("Enter your query"):
     with st.chat_message("user"):
         st.write(user_input)
     text_to_sql_using_gemini(user_input, prompts.sql_prompt)
+    
 
 if st.button("🎙 Speak"):
     speech_input = get_speech_input()

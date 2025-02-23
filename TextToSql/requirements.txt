@@ -3,5 +3,3 @@ google-generativeai
 python-dotenv
 mysql-connector-python
 speechrecognition
-sounddevice
-numpy
