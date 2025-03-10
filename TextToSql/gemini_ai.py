@@ -11,7 +11,7 @@ import prompts
 
 # Function to get gemini response (English Sentence -> SQL query)
 def convert_sentence_to_query_using_gemini(sentence, prompt):
-    model = genai.GenerativeModel('gemini-pro')
+    model = genai.GenerativeModel('gemini-1.5-flash')
     response = model.generate_content([prompt[0], sentence])
     return response.text
 
@@ -80,7 +80,7 @@ def text_to_sql_using_gemini(query, prompt):
         
     elif user_intent == "explanation":
         last_result = st.session_state.get("last_result", "No previous data available.")
-        model = genai.GenerativeModel('gemini-pro')
+        model = genai.GenerativeModel('gemini-1.5-flash')
         explanation_prompt = f"Explain the following database result based on the user's input: {last_result}. User query: {query}"
         response = model.generate_content(explanation_prompt)
         response_content = response.text
@@ -104,7 +104,7 @@ def text_to_sql_using_gemini(query, prompt):
         
     elif user_intent == "send_money":
         # Pass the query to model to extract sender, receiver, and amount
-        model = genai.GenerativeModel('gemini-pro')
+        model = genai.GenerativeModel('gemini-1.5-flash')
         extraction_prompt = extract_transaction_details(query)
         extraction_response = model.generate_content(extraction_prompt)
         extraction_response_text = extraction_response.text.replace("```", "").strip()
@@ -129,7 +129,7 @@ def text_to_sql_using_gemini(query, prompt):
             response_content = "Invalid Amount. Amount should be a number."
     
     else:
-        model = genai.GenerativeModel('gemini-pro')
+        model = genai.GenerativeModel('gemini-1.5-flash')
         response = model.generate_content(query)
         response_content = response.text
         
@@ -144,7 +144,7 @@ def text_to_sql_using_gemini(query, prompt):
     
 def classify_user_intent(query):
     """Determine if the user wants a SQL query, explanation, or general conversation."""
-    model = genai.GenerativeModel('gemini-pro')
+    model = genai.GenerativeModel('gemini-1.5-flash')
     classification_prompt = prompts.classification_prompt
 
     response = model.generate_content([classification_prompt, query])

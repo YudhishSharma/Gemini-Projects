@@ -6,10 +6,14 @@ from database_connection import get_database_connection
 
 def extract_bill_details(query):
     """Extract bill type from user input."""
-    model = genai.GenerativeModel('gemini-pro')
+    model = genai.GenerativeModel('gemini-1.5-flash')
     extraction_prompt = money_extraction_prompt(query)
     response = model.generate_content(extraction_prompt)
-    response_text = response.text.replace("```", "").strip()
+    response_text = response.text.strip()
+    if response_text.startswith("```json"):
+        response_text = response_text[7:].strip() 
+    if response_text.endswith("```"):
+        response_text = response_text[:-3].strip()
 
     try:
         response_json = json.loads(response_text)

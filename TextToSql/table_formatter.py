@@ -5,7 +5,7 @@ from decimal import Decimal
 
 def format_using_llm(data, column_names):
     """Use Gemini to format SQL results as a structured table."""
-    model = genai.GenerativeModel('gemini-pro')
+    model = genai.GenerativeModel('gemini-1.5-flash')
     
     formatted_data = serialize_mysql_data(data)
     
