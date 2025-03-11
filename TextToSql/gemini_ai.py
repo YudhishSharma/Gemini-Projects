@@ -10,6 +10,11 @@ from table_formatter import format_using_llm
 from cheque_book import check_cheque_book_status, order_cheque_book
 import prompts
 
+capabilites_phrases = [
+    "what can you do for me", "what can you do", "what are your capabilities",
+    "what are your features", "what services do you offer", "how can you help me"
+]
+
 # Function to get gemini response (English Sentence -> SQL query)
 def convert_sentence_to_query_using_gemini(sentence, prompt):
     model = genai.GenerativeModel('gemini-1.5-flash')
@@ -136,9 +141,12 @@ def text_to_sql_using_gemini(query, prompt):
             response_content = order_cheque_book()
     
     else:
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        response = model.generate_content(query)
-        response_content = response.text
+        if any(phrase in query.lower() for phrase in capabilites_phrases):
+            response_content = prompts.capabilities_response
+        else:
+            model = genai.GenerativeModel('gemini-1.5-flash')
+            response = model.generate_content(query)
+            response_content = response.text
         
         print("Response from gemini for the queries unrelated to SQL:", response_content)
     

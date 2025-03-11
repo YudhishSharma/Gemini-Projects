@@ -100,3 +100,33 @@ classification_prompt = """
     - "Order my cheque book" → order_cheque_book
     - "Request a cheque book" → order_cheque_book
     """
+    
+capabilities_response = """
+   🤖 **I can assist you with the following tasks:**
+
+   1️⃣ **Retrieve Data**  
+      - Check transactions, balances, banking details, and bills.  
+
+   2️⃣ **Explain Data**  
+      - Understand the meaning of retrieved banking data.  
+
+   3️⃣ **General Chat**  
+      - Engage in normal conversations.  
+
+   4️⃣ **Send Money**  
+      - Transfer money to another user.  
+
+   5️⃣ **Pay Bills**  
+      - Pay utility bills like electricity, water, etc.  
+
+   6️⃣ **Format Tables**  
+      - Display data in a structured, pretty format.  
+
+   7️⃣ **SQL & Format**  
+      - Retrieve and format banking data in one go.  
+
+   8️⃣ **Order Cheque Book**  
+      - Request a new cheque book.  
+
+   💡 **Just type your request, and I'll handle the rest!** 😊
+"""

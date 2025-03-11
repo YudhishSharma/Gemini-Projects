@@ -32,7 +32,7 @@ DEFAULT_ASSISTANT_MESSAGE = "Hi buddy!! 😊 How can I help you with your accoun
 
 # Streamlit part
 st.set_page_config(page_title = "Text To SQL")
-st.header("Gemini Query Retriever")
+st.header("Welcome to Virtual AI Assistant")
 
 # Store conversation history
 if "messages" not in st.session_state:
