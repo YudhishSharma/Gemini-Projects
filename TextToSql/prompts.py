@@ -76,8 +76,9 @@ classification_prompt = """
     6. 'table_format' if the user wants the result in a structured table format (e.g., "Show the result in table format", "Prettify the result").
     7. 'sql_and_format' if the user is both **requesting database information AND wants the result in a structured table format** 
        (e.g., "Show my transactions in a table", "Retrieve all bills and format them nicely").
+    8. 'order_cheque_book' if the user wants to order a cheque book.
 
-    Respond with only one word: 'sql', 'explanation', 'conversation', 'send_money', 'pay_bills', 'table_format' or 'sql_and_format'.
+    Respond with only one word: 'sql', 'explanation', 'conversation', 'send_money', 'pay_bills', 'table_format', 'sql_and_format' or 'order_cheque_book'.
 
     Examples:
 
@@ -95,4 +96,7 @@ classification_prompt = """
     - "Prettify the result" → table_format
     - "Show all transactions in a table format" → sql_table
     - "Retrieve all bills and format them nicely" → sql_table
+    - "I want to order a cheque book" → order_cheque_book
+    - "Order my cheque book" → order_cheque_book
+    - "Request a cheque book" → order_cheque_book
     """

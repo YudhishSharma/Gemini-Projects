@@ -2,6 +2,9 @@ from pyexpat import model
 import time
 from turtle import mode
 from urllib import response
+
+from requests import get
+from spending_analysis import get_spending_analysis
 from dotenv import load_dotenv
 
 import google.generativeai as genai
@@ -62,3 +65,11 @@ if st.button("🎙 Speak"):
         with st.chat_message("user"):
             st.write(speech_input)
         text_to_sql_using_gemini(speech_input, prompts.sql_prompt)   
+
+with st.sidebar:
+    st.header("💰 Spending Insights")
+    spending_feedback = get_spending_analysis()
+    st.write(spending_feedback)
+    
+    time.sleep(120)
+    st.rerun()

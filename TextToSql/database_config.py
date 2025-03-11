@@ -69,6 +69,18 @@ ADD_ENTRIES_TO_BILLS = """
 
 """
 
+CREATE_CHEQUE_BOOK_TABLE = """
+    CREATE TABLE IF NOT EXISTS cheque_book (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    issued BOOLEAN NOT NULL DEFAULT FALSE,
+    issued_date DATE DEFAULT NULL
+);
+"""
+
+INSERT_INTO_CHEQUE_BOOK = """
+    INSERT INTO cheque_book (issued, issued_date) VALUES (FALSE, NULL);
+"""
+
 # Function to connect to the database
 def get_database_connection():
     database_connection = mysql.connector.connect(
@@ -85,6 +97,25 @@ def get_database_connection():
         
     return database_connection
 
+def create_cheque_book_table(database_connection):
+    try:
+        cursor = database_connection.cursor()
+        cursor.execute(CREATE_CHEQUE_BOOK_TABLE)
+        database_connection.commit()
+    except MySQLError as err:
+        print(f"\nError during creating table: {err}")
+    finally:
+        cursor.close()
+        
+def insert_into_cheque_book(database_connection):
+    try:
+        cursor = database_connection.cursor()
+        cursor.execute(INSERT_INTO_CHEQUE_BOOK)
+        database_connection.commit()
+    except MySQLError as err:
+        print(f"\nError during inserting into cheque book: {err}")
+    finally:
+        cursor.close()
 
 
 def create_bill_table(database_connection):
@@ -180,6 +211,8 @@ if __name__ == "__main__":
         fetch_data(database_connection)
         create_bill_table(database_connection)
         add_entries_to_bills(database_connection)
+        create_cheque_book_table(database_connection)
+        insert_into_cheque_book(database_connection)
         
         # Close the connection
         database_connection.close()

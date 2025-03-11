@@ -7,6 +7,7 @@ from chat_history import save_chat_history_to_file
 from bill_operations import extract_bill_details, pay_bills
 from transactions import extract_transaction_details, send_money
 from table_formatter import format_using_llm
+from cheque_book import check_cheque_book_status, order_cheque_book
 import prompts
 
 # Function to get gemini response (English Sentence -> SQL query)
@@ -127,6 +128,12 @@ def text_to_sql_using_gemini(query, prompt):
             response_content = "Transaction failed! An error occurred while sending money."
         except ValueError:
             response_content = "Invalid Amount. Amount should be a number."
+    
+    elif user_intent == "order_cheque_book":
+        if check_cheque_book_status():
+            response_content = "You already have a cheque book."
+        else:
+            response_content = order_cheque_book()
     
     else:
         model = genai.GenerativeModel('gemini-1.5-flash')
