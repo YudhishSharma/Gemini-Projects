@@ -32,7 +32,7 @@ DEFAULT_ASSISTANT_MESSAGE = "Hi buddy!! 😊 How can I help you with your accoun
 
 # Streamlit part
 st.set_page_config(page_title = "Text To SQL")
-st.header("Welcome to Virtual AI Assistant")
+st.header("Welcome to Virtual AI Assistant 🤖")
 
 # Store conversation history
 if "messages" not in st.session_state:
@@ -43,7 +43,9 @@ if st.button("New Chat"):
     st.session_state.clear()
     st.session_state["messages"] = [{"role": "assistant", "content": DEFAULT_ASSISTANT_MESSAGE}]
     save_chat_history_to_file([])
-    st.success("Chat reset successfully. Start a new conversation.")
+    st.toast("Chat reset successfully. Start a new conversation.")
+    st.session_state["new_chat_trigger"] = True 
+    st.rerun()
     
 # Display previous chat messages
 for message in st.session_state["messages"]:
@@ -71,5 +73,6 @@ with st.sidebar:
     spending_feedback = get_spending_analysis()
     st.write(spending_feedback)
     
-    time.sleep(120)
-    st.rerun()
+    if "new_chat_trigger" not in st.session_state:
+        time.sleep(120)
+        st.rerun()

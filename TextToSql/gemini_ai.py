@@ -114,6 +114,8 @@ def text_to_sql_using_gemini(query, prompt):
         extraction_prompt = extract_transaction_details(query)
         extraction_response = model.generate_content(extraction_prompt)
         extraction_response_text = extraction_response.text.replace("```", "").strip()
+        if extraction_response_text.lower().startswith("json"):
+            extraction_response_text = extraction_response_text[4:].strip()
         print(extraction_response_text)
         try:
             extraction_response_json = json.loads(extraction_response_text)
